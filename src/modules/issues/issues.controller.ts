@@ -60,10 +60,57 @@ const getSingleIssue = async(req: Request,res: Response)=>{
     } catch (error: any) {
 
         res.status(500).json({
+        success: false,
+        message: error.message,
+        error: error,
+       })
+
+    }
+
+};
+
+
+const updateIssue = async(req: Request,res: Response)=>{
+    const {id} = req.params;
+
+     try {
+        const result = await issueService.updateIssueIntoDB(req.body, id as string)
+
+        res.status(200).json({
+            success: true,
+            message: "Issue updated successfully",
+            data: result.rows[0]
+        });
+     } catch (error: any) {
+        res.status(500).json({
+        success: false,
+        message: error.message,
+        error: error,
+       })
+     }
+};
+
+
+const deleteIssue = async(req: Request,res: Response)=>{
+
+    const {id} = req.params;
+
+    try {
+
+        await issueService.deleteIssueFromDB(id as string);
+
+        res.status(200).json({
+            success: true,
+            message: "Issue deleted successfully"
+        });
+
+    } catch (error: any) {
+
+        res.status(500).json({
             success: false,
             message: error.message,
             errors: error
-        })
+        });
 
     }
 
@@ -72,9 +119,10 @@ const getSingleIssue = async(req: Request,res: Response)=>{
 
 
 
-
 export const issueController = {
     createIssue,
     getAllIssues,
-    getSingleIssue
+    getSingleIssue,
+    updateIssue,
+    deleteIssue
 }

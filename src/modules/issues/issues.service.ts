@@ -1,4 +1,5 @@
 import { pool } from "../../db";
+import type { IIssue } from "./issues.interface";
 
 const createIssueIntoDB = async(payload: any)=>{
     const {title,description,type} = payload;
@@ -24,6 +25,32 @@ const getSingleIssueFromDB = async(id: string)=>{
         SELECT * FROM issues WHERE id=$1
         `,[id]);
         return result;
+};
+
+
+const updateIssueIntoDB = async(payload: IIssue, id:string)=>{
+    const {title,description,type} = payload;
+
+    const result = await pool.query(`
+        UPDATE issues
+        SET
+        title = COALESCE($1,title),
+        description = COALESCE($2,description),
+        type = COALESCE($3,type),
+        updated_at = NOW()
+        WHERE id=$4 RETURNING *
+        `, [title,description,type,id]
+    );
+
+    return result;
+};
+
+
+const deleteIssueFromDB = async(id: string)=>{
+    const result = await pool.query(`
+        DELETE FROM issues WHERE id=$1
+        `,[id]);
+        return result;
 }
 
 
@@ -32,5 +59,7 @@ const getSingleIssueFromDB = async(id: string)=>{
 export const issueService ={
     createIssueIntoDB,
     getAllIssuesFromDB,
-    getSingleIssueFromDB
+    getSingleIssueFromDB,
+    updateIssueIntoDB,
+    deleteIssueFromDB
 }
