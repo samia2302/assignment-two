@@ -16,6 +16,14 @@ const getAllIssuesFromDB = async()=>{
         SELECT * FROM issues
         `);
         return result;
+};
+
+
+const getSingleIssueFromDB = async(id: string)=>{
+    const result = await pool.query(`
+        SELECT * FROM issues WHERE id=$1
+        `,[id]);
+        return result;
 }
 
 
@@ -23,5 +31,6 @@ const getAllIssuesFromDB = async()=>{
 
 export const issueService ={
     createIssueIntoDB,
-    getAllIssuesFromDB
+    getAllIssuesFromDB,
+    getSingleIssueFromDB
 }
