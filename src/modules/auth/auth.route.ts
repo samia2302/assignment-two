@@ -4,7 +4,9 @@ import { authController } from "./auth.controller";
 const router = Router()
 
 
-router.post("/", authController.signupUser)
+router.post("/signup", authController.signupUser)
+
+router.post("/login", authController.loginUser)
 
 
 export const authRoute = router
