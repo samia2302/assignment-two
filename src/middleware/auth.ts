@@ -6,17 +6,17 @@ import { pool } from "../db";
 import config from "../config";
 
 const auth = (...roles: ROLES[])=> {
-    try {
-        return async (req: Request, res: Response, next: NextFunction) =>{
     
+        return async (req: Request, res: Response, next: NextFunction) =>{
+    try {
             const token = req.headers.authorization
     
     if(!token){
-           sendResponse(res, 
+         return sendResponse(res, 
         {
         statusCode: 401,
         success: false,
-        message: "unauthorized access",
+        message: "Unauthorized Access",
         }
        )
     }
@@ -24,36 +24,39 @@ const auth = (...roles: ROLES[])=> {
     const decoded = jwt.verify(token as string, config.secret as string) as JwtPayload
 
     const userData = await pool.query(`
-        SELECT * FROM users WHERE email=$1
-        `,[decoded.email])
+        SELECT * FROM users WHERE id=$1
+        `,[decoded.id])
 
         const user = userData.rows[0]
 
     if(userData.rows.length === 0){
-        sendResponse(res, 
+       return sendResponse(res, 
         {
         statusCode: 404,
         success: false,
-        message: "user not found",
+        message: "User not found",
         }
           )
     }
       
     if(roles.length && !roles.includes(user.role)){
-          sendResponse(res, 
+         return sendResponse(res, 
         {
-        statusCode: 401,
+        statusCode: 403,
         success: false,
-        message: "forbidden",
+        message: "Forbidden Role",
         
        }
       )
     }  
 
+    req.user = decoded;
+
     next();
    }
-    } catch (error) {
+   catch (error) {
         console.log(error)
+    } 
     }
     
 }

@@ -5,7 +5,7 @@ import sendResponse from "../../utility/sendResponse";
 const  createIssue = async(req: Request, res: Response)=>{
     try {
         
-       const result = await issueService.createIssueIntoDB(req.body)
+       const result = await issueService.createIssueIntoDB(req.body, req.user!.id)
 
      sendResponse(res, 
         {
@@ -39,7 +39,7 @@ const getAllIssues = async(req: Request, res: Response)=>{
         statusCode: 200,
         success: true,
         message: "Issues retrived successfully",
-        data: result.rows[0]
+        data: result.rows
        }
       )
 
@@ -69,7 +69,7 @@ const getSingleIssue = async(req: Request,res: Response)=>{
         statusCode: 200,
         success: true,
         message: "Issues retrived successfully",
-        data: result
+        data: result.rows[0]
        }
       )
 
