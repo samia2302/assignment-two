@@ -1,23 +1,30 @@
 import type { Request, Response } from "express";
 import { issueService } from "./issues.service";
+import sendResponse from "../../utility/sendResponse";
 
 const  createIssue = async(req: Request, res: Response)=>{
     try {
         
        const result = await issueService.createIssueIntoDB(req.body)
-       
-              res.status(201).json({
-               success: true,
-               message: "Issue Created Successfully",
-               data: result.rows[0]
-              })
+
+     sendResponse(res, 
+        {
+        statusCode: 201,
+        success: true,
+        message: "Issue Created Successfully",
+        data: result.rows[0]
+       }
+      )
 
     } catch (error: any) {
-        res.status(500).json({
+        sendResponse(res, 
+        {
+        statusCode: 500,
         success: false,
         message: error.message,
-        error: error,
-       })
+        error: error
+       }
+      )
     }
 };
 
@@ -26,19 +33,25 @@ const getAllIssues = async(req: Request, res: Response)=>{
      try {
         
        const result = await issueService.getAllIssuesFromDB()
-       
-              res.status(200).json({
-               success: true,
-               message: "Issues retrived successfully",
-               data: result.rows[0]
-              })
+
+        sendResponse(res, 
+        {
+        statusCode: 200,
+        success: true,
+        message: "Issues retrived successfully",
+        data: result.rows[0]
+       }
+      )
 
     } catch (error: any) {
-        res.status(500).json({
+        sendResponse(res, 
+        {
+        statusCode: 500,
         success: false,
         message: error.message,
-        error: error,
-       })
+        error: error
+       }
+      )
     }
 };
 
@@ -51,19 +64,25 @@ const getSingleIssue = async(req: Request,res: Response)=>{
 
         const result = await issueService.getSingleIssueFromDB(id as string);
 
-        res.status(200).json({
-            success: true,
-            message: "Issue retrived successfully",
-            data: result
-        })
+        sendResponse(res, 
+        {
+        statusCode: 200,
+        success: true,
+        message: "Issues retrived successfully",
+        data: result
+       }
+      )
 
     } catch (error: any) {
 
-        res.status(500).json({
+        sendResponse(res, 
+        {
+        statusCode: 500,
         success: false,
         message: error.message,
-        error: error,
-       })
+        error: error
+       }
+      )
 
     }
 
@@ -76,17 +95,24 @@ const updateIssue = async(req: Request,res: Response)=>{
      try {
         const result = await issueService.updateIssueIntoDB(req.body, id as string)
 
-        res.status(200).json({
-            success: true,
-            message: "Issue updated successfully",
-            data: result.rows[0]
-        });
+        sendResponse(res, 
+        {
+        statusCode: 200,
+        success: true,
+        message: "Issue updated successfully",
+        data: result.rows[0]
+       }
+      )
+
      } catch (error: any) {
-        res.status(500).json({
+        sendResponse(res, 
+        {
+        statusCode: 500,
         success: false,
         message: error.message,
-        error: error,
-       })
+        error: error
+       }
+      )
      }
 };
 
@@ -99,18 +125,24 @@ const deleteIssue = async(req: Request,res: Response)=>{
 
         await issueService.deleteIssueFromDB(id as string);
 
-        res.status(200).json({
-            success: true,
-            message: "Issue deleted successfully"
-        });
+        sendResponse(res, 
+        {
+        statusCode: 200,
+        success: true,
+        message: "Issue deleted successfully"
+       }
+      )
 
     } catch (error: any) {
 
-        res.status(500).json({
-            success: false,
-            message: error.message,
-            errors: error
-        });
+        sendResponse(res, 
+        {
+        statusCode: 500,
+        success: false,
+        message: error.message,
+        error: error
+       }
+      )
 
     }
 

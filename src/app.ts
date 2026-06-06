@@ -1,6 +1,8 @@
 import express, { type Application, type Request, type Response } from "express"
 import { authRoute } from "./modules/auth/auth.route";
 import { issueRoute } from "./modules/issues/issues.route";
+import globalErrorHandler from "./middleware/globalErrorHandler";
+import cors from "cors"
 
 const app: Application = express()
 
@@ -8,6 +10,10 @@ const app: Application = express()
 app.use(express.json());
 app.use(express.text());
 app.use(express.urlencoded({extended: true}))
+const corsOptions = {
+  origin: 'http://localhost:3000',
+}
+app.use(cors(corsOptions));
 
 
 
@@ -22,6 +28,8 @@ app.use('/api/auth', authRoute)
 
 app.use('/api/issues', issueRoute)
 
+
+app.use(globalErrorHandler);
 
 
 
