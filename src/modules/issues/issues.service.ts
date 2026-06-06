@@ -12,24 +12,82 @@ const result = await pool.query(`
 };
 
 
-const getAllIssuesFromDB = async()=>{
-    const result = await pool.query(`
-        SELECT * FROM issues
-        `);
-        return result;
+const getAllIssuesFromDB = async (
+  sort = "newest",
+  type?: string,
+  status?: string
+) => {
+  let query = `SELECT * FROM issues WHERE 1=1`;
+  const values: (string | number)[] = [];
+  let i = 1;
+
+  if (type) {
+    query += ` AND type = $${i}`;
+    values.push(type);
+    i++;
+  }
+
+  if (status) {
+    query += ` AND status = $${i}`;
+    values.push(status);
+    i++;
+  }
+
+  query += sort === "oldest"
+    ? ` ORDER BY created_at ASC`
+    : ` ORDER BY created_at DESC`;
+
+  const issuesResult = await pool.query(query, values);
+
+  const result = [];
+
+  for (const issue of issuesResult.rows) {
+    const userResult = await pool.query(
+      `SELECT id, name, role FROM users WHERE id=$1`,
+      [issue.reporter_id]
+    );
+
+    result.push({
+      ...issue,
+      reporter: userResult.rows[0] || null
+    });
+  }
+
+  return result;
 };
 
 
 const getSingleIssueFromDB = async(id: string)=>{
-    const result = await pool.query(`
+
+    const issueResult = await pool.query(`
         SELECT * FROM issues WHERE id=$1
         `,[id]);
-        return result;
+
+    if(issueResult.rows.length === 0){
+        return issueResult;
+    }
+
+    const issue = issueResult.rows[0];
+
+    const userResult = await pool.query(`
+        SELECT id,name,role
+        FROM users
+        WHERE id=$1
+        `,[issue.reporter_id]);
+
+    return {
+        rows: [
+            {
+                ...issue,
+                reporter: userResult.rows[0] || null
+            }
+        ]
+    };
 };
 
 
 const updateIssueIntoDB = async(payload: IIssue, id:string)=>{
-    const {title,description,type} = payload;
+    const {title,description,type,status} = payload;
 
     const result = await pool.query(`
         UPDATE issues
@@ -37,10 +95,11 @@ const updateIssueIntoDB = async(payload: IIssue, id:string)=>{
         title = COALESCE($1,title),
         description = COALESCE($2,description),
         type = COALESCE($3,type),
+        status = COALESCE($4,status),
         updated_at = NOW()
-        WHERE id=$4 RETURNING *
-        `, [title,description,type,id]
-    );
+        WHERE id=$5
+        RETURNING *
+    `,[title,description,type,status,id]);
 
     return result;
 };

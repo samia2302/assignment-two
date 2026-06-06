@@ -32,14 +32,16 @@ const  createIssue = async(req: Request, res: Response)=>{
 const getAllIssues = async(req: Request, res: Response)=>{
      try {
         
-       const result = await issueService.getAllIssuesFromDB()
+      const { sort = "newest", type, status } = req.query;
+
+       const result = await issueService.getAllIssuesFromDB(sort as string, type as string,status as string)
 
         sendResponse(res, 
         {
         statusCode: 200,
         success: true,
         message: "Issues retrived successfully",
-        data: result.rows
+        data: result
        }
       )
 
@@ -68,7 +70,7 @@ const getSingleIssue = async(req: Request,res: Response)=>{
         {
         statusCode: 200,
         success: true,
-        message: "Issues retrived successfully",
+        message: "Issues retrieved successfully",
         data: result.rows[0]
        }
       )
@@ -93,6 +95,40 @@ const updateIssue = async(req: Request,res: Response)=>{
     const {id} = req.params;
 
      try {
+
+const issueResult = await issueService.getSingleIssueFromDB(id as string);
+
+    if (issueResult.rows.length === 0) {
+      return sendResponse(res, {
+        statusCode: 404,
+        success: false,
+        message: "Issue not found",
+      });
+    }
+
+    const issue = issueResult.rows[0];
+    const user = req.user!;
+
+    if (user.role !== "maintainer") {
+      
+      if (issue.reporter_id !== user.id) {
+        return sendResponse(res, {
+          statusCode: 403,
+          success: false,
+          message: "You can only update your own issue",
+        });
+      }
+
+      if (issue.status !== "open") {
+        return sendResponse(res, {
+          statusCode: 403,
+          success: false,
+          message: "You can only update open issues",
+        });
+      }
+    }
+
+
         const result = await issueService.updateIssueIntoDB(req.body, id as string)
 
         sendResponse(res, 
