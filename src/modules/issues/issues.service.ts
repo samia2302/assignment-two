@@ -39,21 +39,21 @@ const getAllIssuesFromDB = async (
 
   const issuesResult = await pool.query(query, values);
 
-  const result = [];
+  const issues = issuesResult.rows;
 
-  for (const issue of issuesResult.rows) {
-    const userResult = await pool.query(
-      `SELECT id, name, role FROM users WHERE id=$1`,
-      [issue.reporter_id]
-    );
+  const reporterIds = [...new Set(issues.map(i => i.reporter_id))];
 
-    result.push({
-      ...issue,
-      reporter: userResult.rows[0] || null
-    });
-  }
+  const usersResult = await pool.query(
+    `SELECT id, name, role FROM users WHERE id = ANY($1)`,
+    [reporterIds]
+  );
 
-  return result;
+  const usersMap = new Map(usersResult.rows.map(u => [u.id, u]));
+
+  return issues.map(issue => ({
+    ...issue,
+    reporter: usersMap.get(issue.reporter_id) || null
+  }));
 };
 
 
@@ -63,8 +63,8 @@ const getSingleIssueFromDB = async(id: string)=>{
         SELECT * FROM issues WHERE id=$1
         `,[id]);
 
-    if(issueResult.rows.length === 0){
-        return issueResult;
+    if (!issueResult.rows.length) {
+    return null;
     }
 
     const issue = issueResult.rows[0];
@@ -76,13 +76,9 @@ const getSingleIssueFromDB = async(id: string)=>{
         `,[issue.reporter_id]);
 
     return {
-        rows: [
-            {
-                ...issue,
-                reporter: userResult.rows[0] || null
-            }
-        ]
-    };
+        ...issue,
+        reporter: userResult.rows[0] || null
+           };
 };
 
 

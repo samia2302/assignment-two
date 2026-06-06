@@ -55,8 +55,12 @@ const auth = (...roles: ROLES[])=> {
     next();
    }
    catch (error) {
-        console.log(error)
-    } 
+        return sendResponse(res, {
+        statusCode: 401,
+        success: false,
+        message: "Invalid Token"
+        });
+       } 
     }
     
 }
