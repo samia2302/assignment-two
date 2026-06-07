@@ -64,24 +64,22 @@ const getSingleIssue = async(req: Request,res: Response)=>{
 
     try {
 
-        const result = await issueService.getSingleIssueFromDB(id as string);
+      const result = await issueService.getSingleIssueFromDB(id as string);
 
-        if (result.rows.length === 0) {
-        return sendResponse(res, {
-        statusCode: 404,
-        success: false,
-        message: "Issue not found"
-        });
-       }
+if (!result) {
+  return sendResponse(res, {
+    statusCode: 404,
+    success: false,
+    message: "Issue not found"
+  });
+}
 
-        sendResponse(res, 
-        {
-        statusCode: 200,
-        success: true,
-        message: "Issues retrieved successfully",
-        data: result.rows[0]
-       }
-      )
+sendResponse(res, {
+  statusCode: 200,
+  success: true,
+  message: "Issue retrieved successfully",
+  data: result
+});
 
     } catch (error: any) {
 
@@ -106,7 +104,7 @@ const updateIssue = async(req: Request,res: Response)=>{
 
 const issueResult = await issueService.getSingleIssueFromDB(id as string);
 
-    if (issueResult.rows.length === 0) {
+    if (!issueResult) {
       return sendResponse(res, {
         statusCode: 404,
         success: false,
@@ -114,7 +112,7 @@ const issueResult = await issueService.getSingleIssueFromDB(id as string);
       });
     }
 
-    const issue = issueResult.rows[0];
+    const issue = issueResult;
     const user = req.user!;
 
     if (user.role !== "maintainer") {
