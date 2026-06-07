@@ -40,7 +40,7 @@ const getAllIssues = async(req: Request, res: Response)=>{
         {
         statusCode: 200,
         success: true,
-        message: "Issues retrived successfully",
+        message: "Issues retrieved successfully",
         data: result
        }
       )
