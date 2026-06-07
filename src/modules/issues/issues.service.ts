@@ -13,11 +13,10 @@ const result = await pool.query(`
 
 
 const getAllIssuesFromDB = async (
-  sort = "newest",
-  type?: string,
-  status?: string
-) => {
+  sort = "newest",type?: string,status?: string) => {
+
   let query = `SELECT * FROM issues WHERE 1=1`;
+
   const values: (string | number)[] = [];
   let i = 1;
 
@@ -33,9 +32,7 @@ const getAllIssuesFromDB = async (
     i++;
   }
 
-  query += sort === "oldest"
-    ? ` ORDER BY created_at ASC`
-    : ` ORDER BY created_at DESC`;
+  query += sort === "oldest" ? ` ORDER BY created_at ASC` : ` ORDER BY created_at DESC`;
 
   const issuesResult = await pool.query(query, values);
 
